@@ -8,7 +8,7 @@ setup(
   author = 'José fernando Tavares',                   # Type in your name
   author_email = 'fernando@booknando.com.br',      # Type in your E-Mail
   url = 'https://github.com/JFTavares/bkepub',   # Provide either the link to your github or to your website
-  download_url = 'https://github.com/JFTavares/bkepub',    # I explain this later on
+  download_url = 'https://github.com/JFTavares/bkepub/releases/tag/v.0.0.1',    # I explain this later on
   keywords = ["epub", "ebook", "publish", "xml", "epub3", "markdown", "parser", "generator"],   # Keywords that define your package best
   install_requires=[            # I get to this in a second
           "lxml>=4.6",       # Necessário para parsing robusto e geração de XML
