@@ -1,0 +1,20 @@
+
+**Próximos Passos Cruciais:**
+
+1.  **Testes, Testes, Testes:** Criar testes robustos em `tests/` usando `pytest`.
+    *   Testar a criação de ePubs simples e complexos.
+    *   Testar a conversão de Markdown.
+    *   Testar o wrap de HTML.
+    *   **Testar o `load_epub` com vários arquivos `.epub` diferentes** (baixar alguns exemplos ou usar os de teste de validadores como EPUBCheck). Testar ePubs com e sem NCX, com diferentes estruturas de diretório, etc.
+    *   Testar salvar um livro carregado (`load` -> `save`) e verificar se o resultado é um ePub válido e estruturalmente similar.
+    *   Testar casos de erro (arquivos corrompidos, metadados faltando, itens não encontrados).
+2.  **Validação:** Usar um validador externo como o [EPUBCheck](https://github.com/w3c/epubcheck) para verificar a validade dos ePubs gerados pela biblioteca. Corrigir quaisquer erros ou avisos reportados.
+3.  **Refinamento do `load_epub`:** A implementação atual é básica. Pode precisar de mais tratamento de erros, melhor resolução de caminhos relativos (especialmente em NCX e NAV hrefs), e potencialmente lazy loading de conteúdo para ePubs grandes. A forma como os `href` são armazenados e resolvidos (relativos ao OPF? relativos ao OEBPS?) precisa ser consistente entre load e save. A implementação atual assume que `href` nos itens e TOC são relativos ao `oebps_dir`.
+4.  **Documentação:** Adicionar docstrings detalhadas a todas as classes, métodos e funções públicas. Considerar gerar documentação com Sphinx.
+5.  **Empacotamento e Publicação:**
+    *   Construir os pacotes: `python -m build`
+    *   Testar a instalação do wheel gerado (`.whl`) em um ambiente limpo.
+    *   Registrar-se no [PyPI](https://pypi.org/) (e no TestPyPI para testes).
+    *   Usar `twine` para fazer o upload: `twine upload dist/*` (primeiro para o TestPyPI, depois para o PyPI real).
+
+Esta versão está significativamente mais completa e alinhada com suas solicitações. A adição do `load_epub` e do suporte a Markdown aumenta muito a utilidade da biblioteca, mas também a complexidade, tornando os testes ainda mais importantes.

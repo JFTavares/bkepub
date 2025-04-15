@@ -1,0 +1,24 @@
+bkepub/
+├── bkepub/
+│   ├── __init__.py
+│   ├── builder.py      # Classe principal EpubBuilder (era book.py)
+│   ├── constants.py    # Constantes (namespaces, media types)
+│   ├── conversion.py   # Funções de conversão (Markdown -> XHTML)
+│   ├── exceptions.py   # Exceções personalizadas
+│   ├── item.py         # Classes para itens do manifesto (ManifestItem, etc.)
+│   ├── loader.py       # Função load_epub para carregar ePubs
+│   ├── metadata.py     # Classe MetadataManager
+│   ├── templates.py    # Geração de XML (container, opf, nav) usando lxml
+│   └── utils.py        # Funções utilitárias
+├── tests/
+│   ├── __init__.py
+│   ├── fixtures/       # Para colocar ePubs de teste
+│   │   └── sample.epub # Um ePub válido para testar o load (criar ou baixar um)
+│   └── test_builder.py # Testes com pytest
+│   └── test_loader.py  # Testes específicos para load_epub
+├── examples/
+│   └── create_complex_epub.py # Exemplo de uso mais completo
+├── LICENSE             # Ex: MIT License
+├── README.md
+├── pyproject.toml      # Configuração de empacotamento e dependências
+└── requirements-dev.txt # Dependências de desenvolvimento (pytest, etc.)

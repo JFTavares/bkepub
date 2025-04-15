@@ -1,0 +1,7 @@
+# Development dependencies
+pytest>=6.0
+pytest-cov>=2.10 # For coverage reports
+black>=22.0      # Code formatter
+isort>=5.0       # Import sorter
+mypy>=0.900      # Optional: Static type checker
+lxml-stubs       # Optional: Type stubs for lxml (if using mypy)

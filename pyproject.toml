@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bkepub" # Renomeado
+version = "0.2.0" # Versão atualizada
+authors = [
+    { name = "José Fernando Tavares / Booknando", email = "fernando@booknando.com.br" },
+]
+description = "A Python library for creating and manipulating EPUB 3 files, with Markdown support and loading capabilities."
+readme = "README.md"
+license = { file = "LICENSE" } # Ou { text = "MIT License" }
+requires-python = ">=3.8" # lxml e markdown podem requerer versões mais recentes
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: MIT License", # Escolha sua licença
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta", # Mudou para Beta devido ao load/markdown
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing :: Markup :: XML",
+    "Topic :: Text Processing :: Markup :: HTML",
+    "Topic :: Multimedia :: Graphics :: Ebooks", # Adicionado
+    "Topic :: Utilities",
+]
+keywords = ["epub", "ebook", "publish", "xml", "epub3", "markdown", "parser", "generator"] # Adicionado keywords
+dependencies = [
+    "lxml>=4.6",       # Necessário para parsing robusto e geração de XML
+    "Markdown>=3.3",   # Necessário para conversão de Markdown
+]
+
+[project.urls]
+Homepage = "https://github.com/jftavares/bkepub" # Atualize com seu link
+Issues = "https://github.com/jftavares/bkepub/issues" # Atualize com seu link
+
+# Optional: configuration for tools like black, isort, pytest could go here
+# [tool.pytest.ini_options]
+# pythonpath = ["."]
+# testpaths = ["tests"]
+
+# [tool.black]
+# line-length = 88
+
+# [tool.isort]
+# profile = "black"
