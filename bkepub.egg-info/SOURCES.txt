@@ -1,0 +1,17 @@
+README.md
+setup.py
+bkepub/__init__.py
+bkepub/builder.py
+bkepub/constants.py
+bkepub/conversion.py
+bkepub/exceptions.py
+bkepub/item.py
+bkepub/loader.py
+bkepub/metadata.py
+bkepub/templates.py
+bkepub/utils.py
+bkepub.egg-info/PKG-INFO
+bkepub.egg-info/SOURCES.txt
+bkepub.egg-info/dependency_links.txt
+bkepub.egg-info/requires.txt
+bkepub.egg-info/top_level.txt
