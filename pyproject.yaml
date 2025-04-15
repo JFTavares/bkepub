@@ -3,14 +3,14 @@ requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "bkepub" # Renomeado
+name = "bkepub"
 version = "0.2.0" # Versão atualizada
 authors = [
     { name = "José Fernando Tavares / Booknando", email = "fernando@booknando.com.br" },
 ]
 description = "A Python library for creating and manipulating EPUB 3 files, with Markdown support and loading capabilities."
 readme = "README.md"
-license = { file = "LICENSE" } # Ou { text = "MIT License" }
+license = { file = "LICENSE" }
 requires-python = ">=3.8" # lxml e markdown podem requerer versões mais recentes
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -18,7 +18,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "License :: OSI Approved :: MIT License", # Escolha sua licença
+    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Development Status :: 4 - Beta", # Mudou para Beta devido ao load/markdown
     "Intended Audience :: Developers",
