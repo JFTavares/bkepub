@@ -12,9 +12,13 @@ from .constants import (
     ROLE_AUTHOR, ROLE_EDITOR, ROLE_ILLUSTRATOR,
     # Common landmark types
     LANDMARK_TOC, LANDMARK_COVER, LANDMARK_BODMATTER, LANDMARK_TITLEPAGE,
+    # New folder structure constants
+    SUBDIR_TEXT, SUBDIR_STYLES, SUBDIR_IMAGES, SUBDIR_FONTS,
+    SUBDIR_AUDIO, SUBDIR_VIDEO, SUBDIR_MISC
 )
+from .toc_generator import extract_headings_from_html, build_hierarchical_toc
 
-__version__ = "0.2.0" # Incremented version for new features
+__version__ = "0.3.0"  # Incremented version for folder structure support
 
 __all__ = [
     # Core class
@@ -37,7 +41,19 @@ __all__ = [
     # Constants (optional export)
     "ROLE_AUTHOR", "ROLE_EDITOR", "ROLE_ILLUSTRATOR",
     "LANDMARK_TOC", "LANDMARK_COVER", "LANDMARK_BODMATTER", "LANDMARK_TITLEPAGE",
+    # Folder structure constants
+    "SUBDIR_TEXT", "SUBDIR_STYLES", "SUBDIR_IMAGES", "SUBDIR_FONTS",
+    "SUBDIR_AUDIO", "SUBDIR_VIDEO", "SUBDIR_MISC",
 ]
 
-# Expose the load function directly from the package
-load = EpubBuilder.load
+
+def load(epub_path: str, reconfigure_structure: bool = False):
+    """
+    Loads an existing EPUB file and returns a populated EpubBuilder instance.
+
+    Args:
+        epub_path: Path to the EPUB file
+        reconfigure_structure: If True, reorganizes the content into folder structure
+    """
+    from .loader import load_epub
+    return load_epub(epub_path, reconfigure_structure)

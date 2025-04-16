@@ -9,9 +9,11 @@ bkepub/item.py
 bkepub/loader.py
 bkepub/metadata.py
 bkepub/templates.py
+bkepub/toc_generator.py
 bkepub/utils.py
 bkepub.egg-info/PKG-INFO
 bkepub.egg-info/SOURCES.txt
 bkepub.egg-info/dependency_links.txt
 bkepub.egg-info/requires.txt
 bkepub.egg-info/top_level.txt
+tests/test_toc.py

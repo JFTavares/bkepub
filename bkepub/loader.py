@@ -8,6 +8,9 @@ from .builder import EpubBuilder # Import the main builder class
 from .item import (ManifestItem, HtmlContentItem, CssStyleItem, ImageItem,
                    NavigationItem, NcxItem, FontItem, JavaScriptItem) # Import item types
 from .metadata import MetadataManager
+import re
+from .utils import utils
+
 from . import constants
 from .exceptions import EpubParseError, ItemNotFoundError
 from .utils import get_relative_path, sanitize_href
@@ -15,12 +18,14 @@ from .utils import get_relative_path, sanitize_href
 # XML parser that recovers from errors and removes comments/processing instructions
 PARSER = etree.XMLParser(recover=True, remove_comments=True, remove_pis=True)
 
-def load_epub(epub_path: str) -> EpubBuilder:
+def load_epub(epub_path: str, reconfigure_structure: bool = False) -> EpubBuilder:
     """
     Loads an existing EPUB file and parses its structure.
 
     Args:
         epub_path: Path to the .epub file.
+        reconfigure_structure: If True, reorganizes content into folder structure
+                              (Text, Styles, Images, etc.)
 
     Returns:
         An EpubBuilder instance populated with the EPUB's content and metadata.
@@ -32,7 +37,7 @@ def load_epub(epub_path: str) -> EpubBuilder:
     if not os.path.exists(epub_path):
         raise FileNotFoundError(f"EPUB file not found: {epub_path}")
 
-    builder = EpubBuilder() # Create a new builder instance to populate
+    builder = EpubBuilder(use_folder_structure=reconfigure_structure)
     opf_path = None
     opf_dir = ""
     items_by_href = {} # Helper map: { 'OEBPS/chapter1.xhtml': ManifestItem }
@@ -156,8 +161,66 @@ def load_epub(epub_path: str) -> EpubBuilder:
         # Catch any other unexpected errors during loading
         raise EpubParseError(f"Failed to load EPUB '{epub_path}': {e}")
 
+    if reconfigure_structure:
+        _update_references_for_new_structure(builder)
     return builder
 
+
+def _update_references_for_new_structure(builder: EpubBuilder):
+    """
+    Updates all references in the EPUB to match the new folder structure.
+
+    This includes TOC entries, landmarks, and any other internal references.
+    """
+    # Create a mapping of old hrefs to new hrefs
+    href_mapping = {}
+    for item in builder.get_manifest_items():
+        # Skip NCX and OPF files - they should maintain their references
+        if item.media_type == constants.MEDIA_TYPE_NCX or item.href.endswith(constants.OPF_FILE_NAME):
+            continue
+
+        # The original href is stored in builder but not directly accessible
+        # We can infer it from the item's original_file_name
+        old_href = item.original_file_name
+        new_href = item.href
+        if old_href != new_href:
+            href_mapping[old_href] = new_href
+
+    # Update TOC entries recursively
+    def update_toc_hrefs(entries):
+        for entry in entries:
+            if entry['href'] in href_mapping:
+                entry['href'] = href_mapping[entry['href']]
+            if 'children' in entry and entry['children']:
+                update_toc_hrefs(entry['children'])
+
+    update_toc_hrefs(builder._toc_entries)
+
+    # Update landmarks
+    for landmark in builder._landmarks:
+        if landmark['href'] in href_mapping:
+            landmark['href'] = href_mapping[landmark['href']]
+
+def _update_css_links_in_html(builder: EpubBuilder, href_mapping: dict):
+    """Updates CSS links in HTML content when reorganizing structure."""
+    for item in builder.get_manifest_items():
+        if isinstance(item, HtmlContentItem):
+            try:
+                content_str = item.content.decode('utf-8')
+                # Find CSS links
+                css_links = re.findall(r'<link\s+[^>]*href=["\']([^"\']+)["\'][^>]*>', content_str)
+                for css_link in css_links:
+                    if css_link in href_mapping:
+                        # Calculate new relative path
+                        html_path = os.path.join(builder.oebps_dir, item.href)
+                        css_path = os.path.join(builder.oebps_dir, href_mapping[css_link])
+                        new_css_href = utils.get_relative_path(css_path, html_path)
+                        # Replace in content
+                        content_str = content_str.replace(f'href="{css_link}"', f'href="{new_css_href}"')
+                        content_str = content_str.replace(f"href='{css_link}'", f"href='{new_css_href}'")
+                item.content = content_str.encode('utf-8')
+            except Exception as e:
+                print(f"Warning: Error updating CSS links in {item.href}: {e}")
 
 def parse_metadata(metadata_node: etree._Element, manager: MetadataManager):
     """Parses the <metadata> node and populates the MetadataManager."""

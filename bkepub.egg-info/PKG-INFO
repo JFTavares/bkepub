@@ -1,6 +1,6 @@
-Metadata-Version: 2.1
+Metadata-Version: 2.2
 Name: bkepub
-Version: 0.1
+Version: 0.7
 Summary: Create and manipulate ePub3 files
 Home-page: https://github.com/JFTavares/bkepub
 Download-URL: https://github.com/JFTavares/bkepub/releases/tag/v.0.0.1
@@ -8,7 +8,6 @@ Author: José fernando Tavares
 Author-email: fernando@booknando.com.br
 License: MIT
 Keywords: epub,ebook,publish,xml,epub3,markdown,parser,generator
-Platform: UNKNOWN
 Classifier: Development Status :: 3 - Alpha
 Classifier: Intended Audience :: Developers
 Classifier: Topic :: Software Development :: Build Tools
@@ -17,6 +16,14 @@ Classifier: Programming Language :: Python :: 3
 Classifier: Programming Language :: Python :: 3.4
 Classifier: Programming Language :: Python :: 3.5
 Classifier: Programming Language :: Python :: 3.6
-
-UNKNOWN
-
+Requires-Dist: lxml>=4.6
+Requires-Dist: Markdown>=3.3
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: download-url
+Dynamic: home-page
+Dynamic: keywords
+Dynamic: license
+Dynamic: requires-dist
+Dynamic: summary

@@ -12,6 +12,17 @@ NSMAP = {
     'xml': "http://www.w3.org/XML/1998/namespace" # For xml:lang
 }
 
+# Subdirectory structure within OEBPS
+SUBDIR_TEXT = "Text"
+SUBDIR_STYLES = "Styles"
+SUBDIR_IMAGES = "Images"
+SUBDIR_FONTS = "Fonts"
+SUBDIR_AUDIO = "Audio"
+SUBDIR_VIDEO = "Video"
+SUBDIR_MISC = "Misc"
+
+
+
 # Media Types
 MEDIA_TYPE_EPUB = 'application/epub+zip'
 MEDIA_TYPE_XHTML = 'application/xhtml+xml'
@@ -28,8 +39,41 @@ MEDIA_TYPE_WOFF = 'application/font-woff'
 MEDIA_TYPE_WOFF2 = 'font/woff2'
 MEDIA_TYPE_JAVASCRIPT = 'text/javascript' # Ou application/javascript
 
+
+# Mapping of media types to appropriate subdirectories
+MEDIA_TYPE_TO_SUBDIR = {
+    MEDIA_TYPE_XHTML: SUBDIR_TEXT,
+    MEDIA_TYPE_CSS: SUBDIR_STYLES,
+    MEDIA_TYPE_JPEG: SUBDIR_IMAGES,
+    MEDIA_TYPE_PNG: SUBDIR_IMAGES,
+    MEDIA_TYPE_GIF: SUBDIR_IMAGES,
+    MEDIA_TYPE_SVG: SUBDIR_IMAGES,
+    MEDIA_TYPE_OTF: SUBDIR_FONTS,
+    MEDIA_TYPE_TTF: SUBDIR_FONTS,
+    MEDIA_TYPE_WOFF: SUBDIR_FONTS,
+    MEDIA_TYPE_WOFF2: SUBDIR_FONTS,
+    MEDIA_TYPE_JAVASCRIPT: SUBDIR_MISC,
+    # Additional media types can be added here
+}
+
+# Audio/Video media types
+MEDIA_TYPE_MP3 = 'audio/mpeg'
+MEDIA_TYPE_MP4_AUDIO = 'audio/mp4'
+MEDIA_TYPE_OGG_AUDIO = 'audio/ogg'
+MEDIA_TYPE_MP4_VIDEO = 'video/mp4'
+MEDIA_TYPE_WEBM = 'video/webm'
+
+# Add audio/video mappings
+MEDIA_TYPE_TO_SUBDIR.update({
+    MEDIA_TYPE_MP3: SUBDIR_AUDIO,
+    MEDIA_TYPE_MP4_AUDIO: SUBDIR_AUDIO,
+    MEDIA_TYPE_OGG_AUDIO: SUBDIR_AUDIO,
+    MEDIA_TYPE_MP4_VIDEO: SUBDIR_VIDEO,
+    MEDIA_TYPE_WEBM: SUBDIR_VIDEO,
+})
+
 # Default values
-DEFAULT_LANG = "en"
+DEFAULT_LANG = "pt-br"
 DEFAULT_EPUB_VERSION = "3.0"
 OPF_FILE_NAME = "content.opf"
 NAV_FILE_NAME = "nav.xhtml"

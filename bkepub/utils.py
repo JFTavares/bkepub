@@ -1,11 +1,15 @@
 # bkepub/utils.py
+from __future__ import annotations
+
 import uuid
 import datetime
 import re
 import os
+import zipfile
 from urllib.parse import unquote
 from pathlib import Path
 from . import constants
+from typing import Union
 
 def generate_unique_id(prefix="id"):
     """Generates a unique ID string suitable for XML IDs."""
@@ -70,13 +74,11 @@ def get_media_type(filename: str) -> str:
 
 def wrap_html_fragment(fragment: str, title: str, lang: str = constants.DEFAULT_LANG) -> str:
     """Wraps an HTML fragment in a complete, valid XHTML structure."""
-    return f"""<?xml version="1.0" encoding="UTF-8"?>
+    return f"""<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html>
-<html xmlns="{constants.NSMAP['xhtml']}" xmlns:epub="{constants.NSMAP['epub']}" xml:lang="{lang}" lang="{lang}">
+<html xmlns="{constants.NSMAP['xhtml']}" xmlns:epub="{constants.NSMAP['epub']}">
 <head>
-  <meta charset="UTF-8"/>
   <title>{title or 'Content Document'}</title>
-  {'''<!-- Add links to CSS here if needed -->''' }
 </head>
 <body>
 {fragment}
@@ -92,7 +94,7 @@ def is_full_xhtml(content: bytes) -> bool:
            content_start.startswith('<!doctype html>') or \
            content_start.startswith('<html')
 
-def ensure_bytes(content: str | bytes, encoding: str = 'utf-8') -> bytes:
+def ensure_bytes(content: Union[str, bytes], encoding: str = 'utf-8') -> bytes:
     """Ensures the content is bytes, encoding if necessary."""
     if isinstance(content, str):
         return content.encode(encoding)
@@ -112,3 +114,33 @@ def get_relative_path(target_path: str, start_path: str) -> str:
     except ValueError:
         # Happens if paths are on different drives on Windows
         return target_path.replace("\\", "/") # Fallback to absolute-like path within zip
+
+
+def ensure_directory_structure(epub_zip: zipfile.ZipFile):
+    """
+    Ensures that all required subdirectories exist in the EPUB zip file.
+    """
+    # Base content directory
+    oebps_dir = constants.OEBPS_DIR_NAME
+
+    # Create META-INF directory if it doesn't exist
+    if "META-INF/" not in [info.filename for info in epub_zip.infolist()]:
+        epub_zip.writestr("META-INF/", b'')
+
+    # Create OEBPS directory if it doesn't exist
+    if f"{oebps_dir}/" not in [info.filename for info in epub_zip.infolist()]:
+        epub_zip.writestr(f"{oebps_dir}/", b'')
+
+    # Create each subdirectory
+    for subdir in [
+        constants.SUBDIR_TEXT,
+        constants.SUBDIR_STYLES,
+        constants.SUBDIR_IMAGES,
+        constants.SUBDIR_FONTS,
+        constants.SUBDIR_AUDIO,
+        constants.SUBDIR_VIDEO,
+        constants.SUBDIR_MISC
+    ]:
+        subdir_path = f"{oebps_dir}/{subdir}/"
+        if subdir_path not in [info.filename for info in epub_zip.infolist()]:
+            epub_zip.writestr(subdir_path, b'')

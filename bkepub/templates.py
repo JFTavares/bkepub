@@ -20,43 +20,47 @@ def generate_container_xml(opf_path: str) -> bytes:
     })
     return etree.tostring(root, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
+
 def generate_opf(
-    unique_identifier_ref: str,
-    metadata_elements: list[tuple],
-    manifest_items: list[ManifestItem],
-    spine_items: list[dict], # [{'idref': str, 'linear': bool}]
-    spine_toc_ref: str | None = None # ID of the NCX item, if present
+        unique_identifier_ref: str,
+        metadata_elements: list[tuple],
+        manifest_items: list[ManifestItem],
+        spine_items: list[dict],
+        spine_toc_ref: str | None = None
 ) -> bytes:
     """Generates the content.opf file content using lxml."""
-    # Determine primary language from metadata for xml:lang attribute
-    primary_lang = constants.DEFAULT_LANG
-    for ns_uri, tag, text, attrs in metadata_elements:
-        if ns_uri == constants.NSMAP['dc'] and tag == 'language':
-            primary_lang = text
-            break
+    # Define namespaces corretamente usando nsmap
+    nsmap = {
+        None: constants.NSMAP['opf'],  # Namespace padrão
+        'dc': constants.NSMAP['dc'],
+        'dcterms': constants.NSMAP['dcterms']
+    }
 
-    root = etree.Element("package",
-                         version=constants.DEFAULT_EPUB_VERSION,
-                         attrib={etree.QName(constants.NSMAP['xml'], 'lang'): primary_lang},
-                         unique_identifier=unique_identifier_ref,
-                         nsmap=constants.NSMAP) # Include all known namespaces
+    # Criar o elemento raiz com os namespaces definidos no nsmap
+    root = etree.Element(etree.QName(constants.NSMAP['opf'], "package"),
+                         attrib={
+                             "version": constants.DEFAULT_EPUB_VERSION,
+                             "unique-identifier": unique_identifier_ref
+                         },
+                         nsmap=nsmap)
 
+    # Resto do código permanece o mesmo
     # --- METADATA ---
     metadata_el = etree.SubElement(root, etree.QName(constants.NSMAP['opf'], "metadata"))
     for ns_uri, tag, text, attrs in metadata_elements:
         # Need to handle qualified attribute names (like opf:scheme)
         clean_attrs = {}
         for k, v in attrs.items():
-            if k.startswith('{') and '}' in k: # Already qualified name {uri}local
+            if k.startswith('{') and '}' in k:  # Already qualified name {uri}local
                 clean_attrs[k] = v
-            elif ':' in k: # Convert prefix:local to {uri}local
+            elif ':' in k:  # Convert prefix:local to {uri}local
                 prefix, local = k.split(':', 1)
                 uri = constants.NSMAP.get(prefix)
                 if uri:
                     clean_attrs[etree.QName(uri, local)] = v
-                else: # Keep unqualified if namespace unknown (warning?)
+                else:  # Keep unqualified if namespace unknown (warning?)
                     clean_attrs[k] = v
-            else: # Unqualified attribute
+            else:  # Unqualified attribute
                 clean_attrs[k] = v
 
         el = etree.SubElement(metadata_el, etree.QName(ns_uri, tag), attrib=clean_attrs)
@@ -68,7 +72,7 @@ def generate_opf(
     for item in manifest_items:
         item_attrs = {
             "id": item.id,
-            "href": item.href, # Already sanitized and relative
+            "href": item.href,
             "media-type": item.media_type
         }
         if item.properties:
@@ -82,7 +86,7 @@ def generate_opf(
     spine_el = etree.SubElement(root, etree.QName(constants.NSMAP['opf'], "spine"), attrib=spine_attrs)
     for spine_ref in spine_items:
         itemref_attrs = {"idref": spine_ref['idref']}
-        if not spine_ref.get('linear', True): # Default linear=yes (True)
+        if not spine_ref.get('linear', True):
             itemref_attrs['linear'] = 'no'
         etree.SubElement(spine_el, etree.QName(constants.NSMAP['opf'], "itemref"), attrib=itemref_attrs)
 
@@ -90,22 +94,18 @@ def generate_opf(
 
 
 def generate_nav_xhtml(
-    book_title: str,
-    toc_entries: list[dict], # [{'label': str, 'href': str, 'children': [...]}]
-    landmarks: list[dict], # [{'label': str, 'href': str, 'type': str (epub:type)}]
-    language: str = constants.DEFAULT_LANG
+        book_title: str,
+        toc_entries: list[dict],
+        landmarks: list[dict],
+        language: str = constants.DEFAULT_LANG
 ) -> bytes:
     """Generates the nav.xhtml content using lxml."""
-    # Basic HTML structure with namespaces
+    # XML declaration and DOCTYPE will be added by tostring() with xml_declaration=True
+
     html = etree.Element(etree.QName(constants.NSMAP['xhtml'], "html"),
-                         nsmap={None: constants.NSMAP['xhtml'], 'epub': constants.NSMAP['epub']},
-                         attrib={
-                             etree.QName(constants.NSMAP['xml'], 'lang'): language,
-                             'lang': language # Non-namespaced lang too
-                         })
+                         nsmap={None: constants.NSMAP['xhtml'], 'epub': constants.NSMAP['epub']})
 
     head = etree.SubElement(html, "head")
-    etree.SubElement(head, "meta", charset="utf-8")
     title_el = etree.SubElement(head, "title")
     title_el.text = f"Table of Contents: {book_title}"
 
@@ -113,10 +113,43 @@ def generate_nav_xhtml(
 
     # --- TOC Navigation ---
     nav_toc = etree.SubElement(body, "nav",
-                               attrib={etree.QName(constants.NSMAP['epub'], "type"): constants.LANDMARK_TOC, "id": "toc"})
-    toc_h = etree.SubElement(nav_toc, "h1") # Or h2
+                               attrib={etree.QName(constants.NSMAP['epub'], "type"): constants.LANDMARK_TOC,
+                                       "id": "toc"})
+    toc_h = etree.SubElement(nav_toc, "h1")  # Or h2
     toc_h.text = "Table of Contents"
     toc_ol = etree.SubElement(nav_toc, "ol")
+
+    def build_toc_list(parent_ol, entries):
+        for entry in entries:
+            li = etree.SubElement(parent_ol, "li")
+            # Ensure href is correctly relative if needed (templates don't know context, assume pre-calculated)
+            a = etree.SubElement(li, "a", href=entry['href'])
+            a.text = entry['label']
+            if entry.get('children'):
+                child_ol = etree.SubElement(li, "ol")
+                build_toc_list(child_ol, entry['children'])
+
+    build_toc_list(toc_ol, toc_entries)
+
+    # --- Landmarks Navigation ---
+    if landmarks:
+        nav_landmarks = etree.SubElement(body, "nav",
+                                         attrib={etree.QName(constants.NSMAP['epub'], "type"): "landmarks"},
+                                         hidden="hidden")  # Usually hidden
+        landmarks_h = etree.SubElement(nav_landmarks, "h1")
+        landmarks_h.text = "Landmarks"
+        landmarks_ol = etree.SubElement(nav_landmarks, "ol")
+        for landmark in landmarks:
+            li = etree.SubElement(landmarks_ol, "li")
+            # Ensure epub:type attribute is correctly namespaced
+            lm_attrs = {
+                'href': landmark['href'],
+                etree.QName(constants.NSMAP['epub'], "type"): landmark['type']
+            }
+            a = etree.SubElement(li, "a", attrib=lm_attrs)
+            a.text = landmark['label']
+
+    # Use method='xml' for correct self-closing tags like <meta/>
 
     def build_toc_list(parent_ol, entries):
         for entry in entries:
